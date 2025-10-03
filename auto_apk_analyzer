@@ -1,0 +1,33 @@
+#!/bin/bash
+# Auto APK Analyzer Launcher Script
+
+# Get the directory where this script is located
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Check if Python 3 is available
+if ! command -v python3 &> /dev/null; then
+    echo "Error: Python 3 is not installed or not in PATH"
+    exit 1
+fi
+
+# Check if required tools are available
+REQUIRED_TOOLS=("adb" "jadx" "apkleaks" "frida" "drozer")
+MISSING_TOOLS=()
+
+for tool in "${REQUIRED_TOOLS[@]}"; do
+    if ! command -v "$tool" &> /dev/null; then
+        MISSING_TOOLS+=("$tool")
+    fi
+done
+
+if [ ${#MISSING_TOOLS[@]} -ne 0 ]; then
+    echo "Warning: The following required tools are not in PATH:"
+    for tool in "${MISSING_TOOLS[@]}"; do
+        echo "  - $tool"
+    done
+    echo "Please install these tools for full functionality."
+    echo
+fi
+
+# Run the main application
+python3 "$SCRIPT_DIR/src/main.py" "$@"

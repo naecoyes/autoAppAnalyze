@@ -1,0 +1,9 @@
+# Python requirements for Auto APK Analyzer
+
+frida-tools>=10.0.0
+requests>=2.25.1
+adbutils>=0.15.0
+urllib3>=1.26.5
+mobsf>=4.4.0
+drozer>=3.1.0
+twisted>=25.5.0

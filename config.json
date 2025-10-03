@@ -1,0 +1,28 @@
+{
+  "mcp_servers": {
+    "mobile_app_testing": {
+      "command": "node",
+      "args": [
+        "/Users/Mac/_Tools/12.Mobile/mobile-app-testing-mcp-main/dist/index.js"
+      ],
+      "env": {}
+    },
+    "jadx_mcp_server": {
+      "command": "/opt/homebrew/bin/uv",
+      "args": [
+        "--directory",
+        "/Users/Mac/_Tools/12.Mobile/jadx-mcp-server",
+        "run",
+        "jadx_mcp_server.py"
+      ]
+    }
+  },
+  "tools": {
+    "adb": "/usr/local/bin/adb",
+    "frida": "/Users/Mac/.pyenv/shims/frida",
+    "jadx": "/Users/Mac/_Tools/12.Mobile/jadx-1.5.3/bin/jadx",
+    "apkleaks": "/opt/homebrew/bin/apkleaks",
+    "mobsf": "/Users/Mac/.pyenv/shims/mobsf",
+    "drozer": "/Users/Mac/.pyenv/shims/drozer"
+  }
+}
