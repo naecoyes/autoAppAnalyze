@@ -1,6 +1,30 @@
 # Auto APK Analyzer
 
+![Python](https://img.shields.io/badge/python-3.7%2B-blue)
+![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux-lightgrey)
+![License](https://img.shields.io/badge/license-MIT-green)
+![Status](https://img.shields.io/badge/status-stable-brightgreen)
+
 An automated APK analysis framework that discovers hidden mobile APIs through static extraction, dynamic interception, and enumeration completion techniques.
+
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/placeholder/auto-apk-analyzer-logo.png" alt="Auto APK Analyzer Logo" width="200"/>
+</p>
+
+## 📋 Table of Contents
+
+- [Overview](#overview)
+- [Key Features](#key-features)
+- [Architecture](#architecture)
+- [Prerequisites](#prerequisites)
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+- [Usage](#usage)
+- [Output Format](#output-format)
+- [Special Features](#special-features)
+- [Testing](#testing)
+- [Contributing](#contributing)
+- [License](#license)
 
 ## Overview
 
@@ -15,29 +39,55 @@ This tool implements a comprehensive pipeline for analyzing Android applications
 
 ## Key Features
 
-- Automated scanning of installed applications on rooted Android devices
-- Special handling for Flutter applications with dedicated detection and interception
-- Three-layer analysis approach: static extraction → dynamic interception → enumeration completion
-- URL Map generation with normalized endpoint information
-- Support for certificate pinning bypass using Frida scripts
-- Developer-based APK organization for systematic analysis
-- Integration with asset management platforms
-- AI-assisted discovery using multiple LLMs (Gemini, ChatGPT, Perplexity, ModelScope, OpenRouter)
-- Structured workflow management with predefined flows, tasks, and subtasks
-- Complete testing framework with unit and integration tests
+- 🔍 **Automated scanning** of installed applications on rooted Android devices
+- 🐦 **Special Flutter handling** with dedicated detection and interception
+- 🧱 **Three-layer analysis approach**: static extraction → dynamic interception → enumeration completion
+- 🗺️ **URL Map generation** with normalized endpoint information
+- 🔐 **Certificate pinning bypass** using Frida scripts
+- 📁 **Developer-based APK organization** for systematic analysis
+- 🤖 **AI-assisted discovery** using multiple LLMs
+- 🔄 **Structured workflow management** with predefined flows and tasks
+- 🧪 **Complete testing framework** with unit and integration tests
+- 📊 **Risk classification** and evidence tracking
+
+## Architecture
+
+```mermaid
+graph TD
+    A[Input: Device/APK] --> B[Static Analysis]
+    A --> C[Dynamic Analysis]
+    A --> D[Component Enumeration]
+    B --> E[URL Mapping]
+    C --> E
+    D --> E
+    E --> F[Normalization]
+    F --> G[Output: URL Map]
+```
+
+The pipeline consists of several main modules:
+
+1. **Device Management**: Enumerates apps on device and organizes them by developer
+2. **Static Extraction Subsystem**: Uses JADX, APKLeaks, and MobSF to extract hardcoded URLs, endpoints, and secrets
+3. **Dynamic Capture Module**: Employs proxy tools with Frida hooks for traffic interception and certificate pinning bypass
+4. **Component Enumeration Module**: Uses Drozer to discover exported components and content URIs
+5. **Flutter App Handler**: Specialized module for detecting and handling Flutter applications
+6. **URL Mapping System**: Consolidates findings from all sources into a normalized URL Map
+7. **AI-Assisted Discovery**: Integrates with LLMs for enhanced app and API discovery
+8. **Task Management**: Structured workflows with task and subtask management
+9. **Workspace Management**: Organizes analysis results by developer and app
 
 ## Prerequisites
 
 - Rooted Android device or emulator
 - ADB (Android Debug Bridge)
-- Python 3.x
-- Required tools: JADX, APKLeaks, Reqable, Frida, Drozer, MobSF
+- Python 3.7+
+- Required tools:
   - JADX: Installed via Homebrew or manually
   - APKLeaks: Installed via Homebrew
   - MobSF: Installed via pip
   - Frida: Installed via pip
   - Drozer: Installed via pip
-  - Reqable: Needs to be installed separately
+  - Reqable: Needs to be installed separately (optional)
 - For Flutter apps: Specialized Frida scripts for TLS bypass
 - API keys for LLM services (optional but recommended)
 
@@ -51,18 +101,29 @@ cd auto-apk-analyze
 # Install Python dependencies
 pip install -r requirements.txt
 
-# Install additional tools
+# Install analysis tools
 brew install jadx apkleaks
 pip install mobsf drozer frida-tools
 
 # Install Frida server on your Android device
 # Download from: https://github.com/frida/frida/releases
+
+# Make the launcher executable
+chmod +x auto_apk_analyzer
 ```
 
-## Configuration
+## Quick Start
 
-1. Configure API keys in `api_keys.json` for LLM services and domain enumeration tools
-2. Update paths in `config.json` for MCP servers and tools if needed
+```bash
+# Analyze all third-party apps on connected device
+./auto_apk_analyzer
+
+# Analyze a specific APK file
+./auto_apk_analyzer --input /path/to/app.apk
+
+# Run predefined analysis flow
+./auto_apk_analyzer --flow device_analysis
+```
 
 ## Usage
 
@@ -102,21 +163,52 @@ python3 src/main.py --input /path/to/app.apk --mode static
 python3 src/main.py --input /path/to/app.apk --mode full
 ```
 
-## Architecture
+## Output Format
 
-The pipeline consists of several main modules:
+The analysis generates a comprehensive URL Map including:
 
-1. **Device Management**: Enumerates apps on device and organizes them by developer
-2. **Static Extraction Subsystem**: Uses JADX, APKLeaks, and MobSF to extract hardcoded URLs, endpoints, and secrets
-3. **Dynamic Capture Module**: Employs Reqable proxy with Frida hooks for traffic interception and certificate pinning bypass
-4. **Component Enumeration Module**: Uses Drozer to discover exported components and content URIs
-5. **Flutter App Handler**: Specialized module for detecting and handling Flutter applications
-6. **URL Mapping System**: Consolidates findings from all sources into a normalized URL Map
-7. **AI-Assisted Discovery**: Integrates with LLMs for enhanced app and API discovery
-8. **Task Management**: Structured workflows with task and subtask management
-9. **Workspace Management**: Organizes analysis results by developer and app
+```json
+{
+  "metadata": {
+    "generated_at": 1234567890.123,
+    "total_entries": 42,
+    "risk_distribution": {
+      "LOW": 25,
+      "MEDIUM": 12,
+      "HIGH": 5
+    }
+  },
+  "entries": [
+    {
+      "signature": "api.example.com/v1/users/{id}",
+      "host": "api.example.com",
+      "path": "/v1/users/{id}",
+      "method": "GET",
+      "parameters": [
+        {
+          "type": "numeric_id",
+          "value": "123"
+        }
+      ],
+      "sources": ["static", "dynamic"],
+      "original_urls": [
+        "https://api.example.com/v1/users/123",
+        "https://api.example.com/v1/users/456"
+      ],
+      "risk_level": "MEDIUM",
+      "first_seen": 1234567890.123,
+      "last_seen": 1234567890.123,
+      "frequency": 2
+    }
+  ],
+  "domains": ["api.example.com", "cdn.example.com"],
+  "endpoints": ["/api/v1/login", "/api/v1/register"]
+}
+```
 
-## Special Flutter App Handling
+## Special Features
+
+### Special Flutter App Handling
 
 The framework includes specialized handling for Flutter applications which use a different network stack:
 
@@ -127,23 +219,7 @@ The framework includes specialized handling for Flutter applications which use a
 - Dedicated Frida scripts for BoringSSL function hooking
 - Automatic configuration of proxy settings for Flutter apps
 
-## Output
-
-The analysis generates a comprehensive URL Map including:
-- Endpoint signatures (host+path+method)
-- Parameter patterns and examples
-- Authentication requirements
-- Evidence traces and discovery sources
-- Activity timestamps and frequency data
-- Risk annotations and validation status
-- Developer-based organization for systematic analysis
-- Component-based endpoint categorization
-- Flutter-specific metadata when applicable
-- Normalized path parameters with templating (e.g., /v1/users/{id})
-- Support for sorting by activity and risk priority
-- Incremental comparison capabilities for version differentiation
-
-## LLM Integration
+### LLM Integration
 
 The tool can leverage multiple LLMs for enhanced discovery:
 - **Perplexity**: For real-time information retrieval about apps and APIs
@@ -154,38 +230,60 @@ The tool can leverage multiple LLMs for enhanced discovery:
 
 API keys should be configured in `api_keys.json` to enable these features.
 
-## Workflow Management
+### Workflow Management
 
 The tool includes a comprehensive task management system with:
 
-### Predefined Flows
+#### Predefined Flows
 1. **Device Analysis Flow**: Complete analysis of APKs on connected Android device
 2. **File Analysis Flow**: Analysis of APK files provided as input
 3. **LLM Discovery Flow**: Discovery of mobile apps and APIs using LLM services
 4. **Full Analysis Flow**: Complete static, dynamic, and AI-assisted analysis pipeline
 
-### Task Hierarchy
+#### Task Hierarchy
 Each flow contains multiple tasks, and complex tasks can have subtasks:
 - Tasks have priorities (Low, Medium, High, Critical)
 - Tasks can be in states (Pending, In Progress, Completed, Failed)
 - Parent tasks automatically complete when all subtasks are completed
 - Progress tracking and status reporting
 
-### Example Task Structure
+## Testing
+
+The project includes a comprehensive testing framework:
+- Unit tests for all core modules
+- Integration tests for module interactions
+- Import verification tests
+- Mock-based testing for external dependencies
+
+Run all tests:
+```bash
+python3 tests/run_tests.py
 ```
-Device Analysis Flow
-├── Device Connectivity Check
-├── Package Enumeration
-│   ├── ADB Connection
-│   ├── List Packages
-│   └── Filter Packages
-├── Developer-based Grouping
-│   ├── Extract Package Metadata
-│   ├── Developer Identification
-│   └── Create Developer Groups
-├── APK Extraction
-│   ├── APK Path Discovery
-│   ├── APK Pull Operations
-│   └── Pulled File Validation
-└── Workspace Organization
+
+Run specific test modules:
+```bash
+python3 -m unittest tests.test_static_analyzer
+python3 -m unittest tests.test_dynamic_analyzer
 ```
+
+## Contributing
+
+Contributions are welcome! Here's how you can contribute:
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+Please ensure your code follows the existing style and includes appropriate tests.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Acknowledgments
+
+- Thanks to all contributors who have helped with testing and improvements
+- Inspired by various mobile security research tools and frameworks
+- Special thanks to the open-source community for the tools this project integrates with
